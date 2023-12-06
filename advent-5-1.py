@@ -1,6 +1,6 @@
 
 if __name__ == "__main__":
-    with open("input-5-0.txt") as f:
+    with open("input-5-tst.txt") as f:
         seeds = f.readline().strip("seeds: ").strip("\n").split()
         seeds = [int(i) for i in seeds]
         
@@ -18,13 +18,12 @@ if __name__ == "__main__":
                 else:
                     mapping[key_name].append([int(line.split(" ")[i]) for i in range(3)])
         
-        # print("Seeds : ", seeds)
-        # print("\n")
-        # print("Keys : ", mapping.keys())
-        # print("\n")
-        # print("Mapping : ", mapping)
+        print("Seeds : ", seeds)
+        print("\n")
+        print("Keys : ", mapping.keys())
+        print("\n")
+        print("Mapping : ", mapping)
         
-        #
         
         # now iterate through the seeds and find if the seed falls within the range of any of the maps, otherwise map it one-to-one
         seeds_mapped_to_location = seeds.copy()
@@ -42,8 +41,3 @@ if __name__ == "__main__":
                 
         print("Seeds mapped to location : ", seeds_mapped_to_location)
         print("Minimum location : ", min(seeds_mapped_to_location))
-                        
-        
-            
-        
-        

@@ -44,7 +44,7 @@ if __name__ == "__main__":
             segment_index = 0
             while completed_all_segments == False:
                 print("\n")
-                current_seed_range = seeds_mapped_to_location[segment_index]
+                current_seed_range = seeds_mapped_to_location[segment_index].copy() # make a copy to prevent changing
                 print("Currently analyzing seeds in range : ", current_seed_range)
                 
                 # go through the six cases of the seed range and the modified range
@@ -58,7 +58,7 @@ if __name__ == "__main__":
                             break
                         else:
                             # print("Right side is to the right of modified range")
-                            leftover_range = [mapping[key][i][1] + mapping[key][i][2] + 1, current_seed_range[1]]
+                            leftover_range = [mapping[key][i][1] + mapping[key][i][2], current_seed_range[1]] # the left most index should be the end of the range since it is left inclusive
                             seeds_mapped_to_location.append(leftover_range) # add the leftover range to the end of the list
                             seeds_mapped_to_location[segment_index][1] = mapping[key][i][0] + mapping[key][i][2]
                             break
@@ -74,7 +74,7 @@ if __name__ == "__main__":
                         elif current_seed_range[1] > mapping[key][i][1] + mapping[key][i][2]:
                             # print("Right side is to the right of modified range")
                             leftover_range_0 = [current_seed_range[0], mapping[key][i][1]]
-                            leftover_range_1 = [mapping[key][i][1] + mapping[key][i][2] + 1, current_seed_range[1]]
+                            leftover_range_1 = [mapping[key][i][1] + mapping[key][i][2], current_seed_range[1]] # the left most index should be the end of the range since it is left inclusive
                             seeds_mapped_to_location.append(leftover_range_0)
                             seeds_mapped_to_location.append(leftover_range_1)
                             seeds_mapped_to_location[segment_index][0] = mapping[key][i][0]
@@ -95,8 +95,3 @@ if __name__ == "__main__":
                 
         print("Seeds mapped to location : ", seeds_mapped_to_location)
         print("Minimum location : ", min(min(seeds_mapped_to_location)))
-                        
-        
-            
-        
-        
