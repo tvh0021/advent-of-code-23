@@ -1,86 +1,71 @@
+import numpy as np
+
 file_path = "/mnt/home/tha10/git_repos/advent-of-code-23/input-4-0.txt"
 
 def number_of_matches(input, reference):
     """Determine if a given input matches a reference.
 
     Args:
-        input (list): The input to check
-        reference (list): The reference to check against
+        input (2d array): The input to check
+        reference (2d array): The reference to check against
 
     Returns:
-        int: The number of matches
+        1d array: The number of matches per card
     """
-    number_of_matches = 0
-    for i in input:
-        if any(i == j for j in reference):
-            number_of_matches += 1
+    number_of_matches = np.zeros(input.shape[0], dtype=int)
+
+    for i, input_line in enumerate(input):
+        reference_line = reference[i,:]
+        number_of_matches[i] = np.sum(np.in1d(input_line, reference_line))
     
     return number_of_matches
 
-# def recursive_add(list_of_instances):
-#     for i in range(len(list_of_instances)):
-#         list_of_instances[i:] += recursive_add(list_of_instances[i+1:])
-    
-#     return list_of_instances
+def total_scratchcards(number_of_matches):
+    """Determine the total number of copies of each scratchcard, following the rules from the problem statement.
+
+    Args:
+        number_of_matches (1d array): The number of matches per card
+
+    Returns:
+        1d array: The number of copies of each scratchcard
+    """
+
+    total = np.ones(number_of_matches.shape[0], dtype=int)
+
+    for i in range(number_of_matches.shape[0]):
+        total[i+1:i+1+number_of_matches[i]] += 1 * total[i]
+
+    return total
 
 if __name__ == "__main__":
-    file = open(file_path, "r") 
-  
-    # reading the file 
-    data = file.read() 
+    with open(file_path, "r") as f:
+        input_file = f.read().split("\n")
     
-    # replacing end splitting the text  
-    # when newline ('\n') is seen. 
-    file_as_list = data.split("\n") 
-    # print(file_as_list)
-    file.close() 
+    results = [i.split(": ")[1] for i in input_file]
+    # print("Result of each scratch card : ", results)
 
-    results = [i.split(": ")[1] for i in file_as_list]
-
-    # print(results)
-
-    reference_list = []
-    input_list = []
-    for i in range(len(results)):
-        input_list.append(results[i].split(" | ")[1].split())
-        reference_list.append(results[i].split(" | ")[0].split())
-
-    match_tally_per_game = [number_of_matches(input_list[i], reference_list[i]) for i in range(len(input_list))]
-    print("Match tally per game : ", match_tally_per_game)
-    print("Length of match tally per game : ", len(match_tally_per_game))
+    reference_array = np.array([i.split(" | ")[0].split() for i in results], dtype=int)
+    input_array = np.array([i.split(" | ")[1].split() for i in results], dtype=int)
     
-    cycle_reproduce = []
+    # print("Reference array : ", reference_array[2,:])
+    # print("Input array : ", input_array[2,:])
+
+    # matches = np.in1d(input_array[40,:], reference_array[40,:])
+    # print("Matches : ", np.sum(matches))
+
+    match_tally_per_game = number_of_matches(input_array, reference_array)
+    # print("Match tally per game : ", match_tally_per_game)
+
+    points_per_game = np.zeros(len(match_tally_per_game), dtype=int)
     for i in range(len(match_tally_per_game)):
-        zeros = [0] * len(match_tally_per_game)
-        if (i+1+match_tally_per_game[i]) > len(match_tally_per_game):
-            end_range = len(match_tally_per_game)
+        if match_tally_per_game[i] == 0:
+            points_per_game[i] = 0
         else:
-            end_range = i+1+match_tally_per_game[i]
-        for j in range(i+1, end_range):
-            zeros[j] += 1
-        cycle_reproduce.append(zeros)
-    
-    base_cy = [1] * len(match_tally_per_game) # every game starts with 1 copy of itself
-    total = base_cy
-    # print(len(cycle_reproduce))
+            points_per_game[i] = 2**(match_tally_per_game[i]-1)
 
-    game = 0
-    while game < len(cycle_reproduce):
-        # print("Matches this game : ", cycle_reproduce[game])
-        # print("Current total : ", total)
-        total_before = total.copy()
-        for index in range(1, len(cycle_reproduce)):
-            # print("Index : ", index)
-            # print("Current value : ", total_before[index])
-            # print("Added value : ", total_before[index-1] * cycle_reproduce[game][index])
-            total[index] = total_before[index-1] * cycle_reproduce[game][index] + total_before[index]
-            # print("New value : ", total[index])
-        
-        game += 1
+    print("Total points for part 1 : ", np.sum(points_per_game))
 
-    print(total)
-    print("Total number of games : ", len(total))
-    print("Total number of scratchcards : ", sum(total))
-        
+    total_scratchcards_per_game = total_scratchcards(match_tally_per_game)
+    # print("Total scratchcards per game : ", total_scratchcards_per_game)
 
-  
+    print("Total number of scratchcards for part 2: ", np.sum(total_scratchcards_per_game))  
