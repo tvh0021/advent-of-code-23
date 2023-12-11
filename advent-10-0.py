@@ -1,9 +1,6 @@
 import numpy as np
 import sys
-sys.setrecursionlimit(1000000)
-np.set_printoptions(threshold=sys.maxsize)
-
-from collections import deque
+sys.setrecursionlimit(100000)
 
 file_path = "/mnt/home/tha10/git_repos/advent-of-code-23/input-10-0.txt"
       
@@ -49,7 +46,7 @@ def findFirstBranch(char_map, start_location):
     """
 
     final_location = [] # there are exactly two pipes that are connected to the starting point
-    print("The starting point is : ", char_map[start_location[0],start_location[1]])
+    # print("The starting point is : ", char_map[start_location[0],start_location[1]])
 
     for i in range(-1 if start_location[0] > 0 else 0, 2 if start_location[0] < char_map.shape[0]-1 else 1):
         for j in range(-1 if start_location[1] > 0 else 0, 2 if start_location[1] < char_map.shape[1]-1 else 1):
@@ -61,7 +58,7 @@ def findFirstBranch(char_map, start_location):
             if any(double_connected):
                 final_location.append(start_location + np.array([i,j]))
 
-    print("First branch includes : ", [char_map[final_location[0][0],final_location[0][1]], char_map[final_location[1][0],final_location[1][1]]])
+    # print("First branch includes : ", [char_map[final_location[0][0],final_location[0][1]], char_map[final_location[1][0],final_location[1][1]]])
 
     return start_location, final_location
 
@@ -79,10 +76,10 @@ def findNextLocation(char_map, current_location, previous_location, depth=1, pre
     # obtain the shape of the current pipe, then ignore the end that is connected to the previous pipe
     connected_nodes = Iterator(char_map, current_location)
     # print("Connected nodes : ", connected_nodes)    
-    double_connected = [(next_node + (current_location - previous_location)).any() for next_node in connected_nodes]
-
-    # print("Connected to previous location : ", double_connected)
     
+    double_connected = [(next_node + (current_location - previous_location)).any() for next_node in connected_nodes]
+    # print("Connected to previous location : ", double_connected)
+
     for i in range(2):
         if double_connected[i]:
             next_location = current_location + connected_nodes[i]
@@ -92,7 +89,7 @@ def findNextLocation(char_map, current_location, previous_location, depth=1, pre
                 depth = depth + 1
                 print("Found the end of the loop!")
                 print("The number of steps is : ", depth)
-                print("The number of steps to reach the furthest location is : ", depth/2)
+                print("The number of steps to reach the furthest location is : ", int(depth/2))
                 break
             else:
                 findNextLocation(char_map, next_location, current_location, depth=depth+1, previous_location_list=previous_location_list)
@@ -129,13 +126,6 @@ def isPointInLoop(x: int, y: int, poly: list[tuple[int, int]]) -> bool:
         j = i
     return c
 
-def castHorizontalRay(char_map, symbol_to_consider):
-    """Using the ray casting algorithm, determine if a dot is enclosed by the pipe. If a dot is inside the pipe, there will be a 
-
-    Args:
-        char_map (_type_): _description_
-        symbol_to_consider (_type_): _description_
-    """
 
 if __name__ == "__main__":
     # read in the map
@@ -146,7 +136,7 @@ if __name__ == "__main__":
     char_map = np.chararray((len(input_file),len(input_file[0])),unicode=True)
     for l, line in enumerate(input_file):
         char_map[l] = np.array([i for i in line.strip("\n")])
-    print(char_map) 
+    # print(char_map) 
 
     # Find the starting point
     starting_point = np.array([0,0])
@@ -162,16 +152,17 @@ if __name__ == "__main__":
     print("Starting point is at coordinates : ", starting_point)
 
     # search in the neighborhood of the starting point for the next pipe
-    print("The neighborhood of the starting point is : \n", char_map[starting_point[0]-1:starting_point[0]+2,starting_point[1]-1:starting_point[1]+2])
+    # print("The neighborhood of the starting point is : \n", char_map[starting_point[0]-1:starting_point[0]+2,starting_point[1]-1:starting_point[1]+2])
 
     # Iterate through the loop
     starting_point, branches = findFirstBranch(char_map, starting_point)
 
     # choose one of the branches, recursively search for the next pipe until the "S" is found again
+    print("Begin recursive search for the next pipe")
     previous_location_list = [starting_point]
     findNextLocation(char_map, branches[0], starting_point, depth=1, previous_location_list=previous_location_list)
 
-    print("All pipe locations : ", len(previous_location_list))
+    # print("All pipe locations : ", len(previous_location_list))
     # print(previous_location_list[0])
     # print(previous_location_list[-1])
     
@@ -185,20 +176,21 @@ if __name__ == "__main__":
     for location in previous_location_list:
         list_of_points_in_pipe.append(tuple(location))
 
-    print("Points in pipe as a list of tuples : ", list_of_points_in_pipe[:10])
+    # print("Points in pipe as a list of tuples : ", list_of_points_in_pipe[:10])
 
     # make four numbers that define the bounding box of the pipe, slightly save computational time by only checking the points within the bounding box
     bounding_box = [np.min(np.array(list_of_points_in_pipe), axis=0), np.max(np.array(list_of_points_in_pipe), axis=0)]
-    print("Bounding box : ", bounding_box[0])
-    print("Bounding box : ", bounding_box[1])
+    # print("Bounding box : ", bounding_box[0])
+    # print("Bounding box : ", bounding_box[1])
 
     # test if a point is enclosed by the pipe
     total_enclosed = 0
     for l in range(bounding_box[0][0], bounding_box[1][0]):
-        print("Scanning line ", l)
+        if l % 40 == 0:
+            print("Scanning row ", l)
         for c in range(bounding_box[0][1], bounding_box[1][1]):
             if isPointInLoop(l,c,list_of_points_in_pipe):
                 pipe_map[l,c] = "I"
                 total_enclosed += 1
 
-    print("Total enclosed : ", total_enclosed)
+    print("Total enclosed area : ", total_enclosed)
